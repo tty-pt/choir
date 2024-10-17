@@ -1,0 +1,61 @@
+#!/bin/sh
+
+im $OWNER || Forbidden
+
+chords_path=$DOCUMENT_ROOT/items/chords/items
+
+if test $REQUEST_METHOD = POST; then
+	list_ops() {
+		ls $DOCUMENT_ROOT/tmp/mpfd/remove-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -d$line; done
+		ls $DOCUMENT_ROOT/tmp/mpfd/add-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -p$line; done
+	}
+
+	list_ops | xargs -I {} qhash {} $ITEM_PATH/songs.db
+
+	cp $DOCUMENT_ROOT/tmp/mpfd/format $ITEM_PATH/format
+	rm $ITEM_PATH/format.db 2>/dev/null || true
+
+	cat $ITEM_PATH/format | while read name; do
+		test ! -z "$name" || continue
+		echo -p\"$name\"
+	done | xargs -I {} qhash {} $ITEM_PATH/format.db
+
+	SeeOther ./
+fi
+
+checkboxes() {
+	local label=$1
+	while read id link title; do
+		cat <<!
+<label class='h f'>
+	<input type='checkbox' name='$label-$link'></input>
+	$title
+</label>
+!
+	done
+}
+
+cat <<!
+<form action='.' method='POST' class='p sf f v' enctype='multipart/form-data'>
+<h4>Format</h4>
+<textarea name='format' class='c8' style='height: 20vh; white-space: pre;'>
+`cat $ITEM_PATH/format`
+</textarea>
+<div class="h f" style="max-height: 50vh; overflow: auto">
+	<div class="v shf">
+		<h4>`_ "Songs to remove"`</h4>
+	</div>
+	<div class="v shf">
+		<h4>`_ "Songs to add"`</h4>
+	</div>
+</div>
+<div class="h f">
+	<div class="v shf" style="max-height: 50vh; overflow: auto">
+`qhash -q $chords_path/links.db -a $chords_path/index.db -l $ITEM_PATH/songs.db | checkboxes remove`
+	</div>
+	<div class="v shf" style="max-height: 50vh; overflow: auto">
+`qhash -q $ITEM_PATH/songs.db -a $chords_path/index.db -L $chords_path/links.db | checkboxes add`
+	</div>
+</div>
+<button>`_ Submit`</button>
+!
