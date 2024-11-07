@@ -3,15 +3,13 @@
 chords_path=$DOCUMENT_ROOT/items/chords/items
 
 list() {
-	qhash -q $chords_path/links.db -a $chords_path/index.db \
-		-l $ITEM_PATH/songs.db | cut -d' ' -f2- | while read link name; do
+	qhash -l $ITEM_PATH/songs.db | cut -d' ' -f2- | while read link flags name; do
 		echo "<a href='/chords/$link/'>$name</a>"
 	done
 }
 
 AddForm() {
-	found="`qhash -g"$REMOTE_USER" $ITEM_PATH/members.db`"
-	test "$found" != "-1" || exit 0
+	groups | tr ' ' '\n' | grep -q "$iid" || return 0
 	cat <<!
 <form action='/sb/add/' method='POST' class='h f fic' enctype='multipart/form-data'>
 <input name='title' type='hidden' value='$iid `cat $ITEM_PATH/counter`'></input>

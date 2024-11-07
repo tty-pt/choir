@@ -6,8 +6,8 @@ chords_path=$DOCUMENT_ROOT/items/chords/items
 
 if test $REQUEST_METHOD = POST; then
 	list_ops() {
-		ls $DOCUMENT_ROOT/tmp/mpfd/remove-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -d$line; done
-		ls $DOCUMENT_ROOT/tmp/mpfd/add-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -p$line; done
+		ls $DOCUMENT_ROOT/tmp/mpfd/remove-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -d\"$line\"; done
+		ls $DOCUMENT_ROOT/tmp/mpfd/add-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -p\"$line\"; done
 	}
 
 	list_ops | xargs -I {} qhash {} $ITEM_PATH/songs.db
@@ -25,10 +25,11 @@ fi
 
 checkboxes() {
 	local label=$1
-	while read id link title; do
+	while read id link flags title; do
+		# echo $label $id $link $flags $title >&2
 		cat <<!
 <label class='h f'>
-	<input type='checkbox' name='$label-$link'></input>
+	<input type='checkbox' name='$label-$link $flags $title'></input>
 	$title
 </label>
 !
@@ -51,10 +52,10 @@ cat <<!
 </div>
 <div class="h f">
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`qhash -q $chords_path/links.db -a $chords_path/index.db -l $ITEM_PATH/songs.db | checkboxes remove`
+`qhash -l $ITEM_PATH/songs.db | checkboxes remove`
 	</div>
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`qhash -q $ITEM_PATH/songs.db -a $chords_path/index.db -L $chords_path/links.db | checkboxes add`
+`qhash -q $ITEM_PATH/songs.db -L $chords_path/index.db | checkboxes add`
 	</div>
 </div>
 <button>`_ Submit`</button>
