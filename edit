@@ -10,15 +10,16 @@ if test $REQUEST_METHOD = POST; then
 		ls $DOCUMENT_ROOT/tmp/mpfd/add-* 2>/dev/null | sed 's/.*-//' | while read line; do echo -p\"$line\"; done
 	}
 
-	list_ops | xargs -I {} qhash {} $ITEM_PATH/songs.db
+	test `list_ops | wc -l` -lt 1 || \
+		list_ops | xargs -I {} qhash {} songs.db
 
-	cp $DOCUMENT_ROOT/tmp/mpfd/format $ITEM_PATH/format
-	rm $ITEM_PATH/format.db 2>/dev/null || true
+	cp $DOCUMENT_ROOT/tmp/mpfd/format format
+	rm format.db 2>/dev/null || true
 
-	cat $ITEM_PATH/format | while read name; do
+	cat format | while read name; do
 		test ! -z "$name" || continue
 		echo -p\"$name\"
-	done | xargs -I {} qhash {} $ITEM_PATH/format.db
+	done | xargs -I {} qhash {} format.db
 
 	SeeOther ./
 fi
@@ -36,11 +37,17 @@ checkboxes() {
 	done
 }
 
+list_missing() {
+	test -f songs.db && \
+		qhash -q songs.db -L $chords_path/index.db
+		qhash -l $chords_path/index.db
+}
+
 cat <<!
 <form action='.' method='POST' class='p sf f v' enctype='multipart/form-data'>
 <h4>Format</h4>
-<textarea name='format' class='c8' style='height: 20vh; white-space: pre;'>
-`cat $ITEM_PATH/format`
+<textarea name='format' style='height: 20vh; white-space: pre;'>
+`cat format`
 </textarea>
 <div class="h f" style="max-height: 50vh; overflow: auto">
 	<div class="v shf">
@@ -52,10 +59,10 @@ cat <<!
 </div>
 <div class="h f">
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`qhash -l $ITEM_PATH/songs.db | checkboxes remove`
+`qhash -l songs.db | checkboxes remove`
 	</div>
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`qhash -q $ITEM_PATH/songs.db -L $chords_path/index.db | checkboxes add`
+`list_missing | checkboxes add`
 	</div>
 </div>
 <button>`_ Submit`</button>

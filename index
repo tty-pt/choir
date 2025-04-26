@@ -3,16 +3,16 @@
 chords_path=$DOCUMENT_ROOT/items/chords/items
 
 list() {
-	qhash -l $ITEM_PATH/songs.db | cut -d' ' -f2- | while read link flags name; do
+	qhash -l songs.db | cut -d' ' -f2- | while read link flags name; do
 		echo "<a href='/chords/$link/'>$name</a>"
 	done
 }
 
 AddForm() {
-	groups | tr ' ' '\n' | grep -q "$iid" || return 0
+	im "$OWNER" "$iid" || return 0
 	cat <<!
 <form action='/sb/add/' method='POST' class='h f fic' enctype='multipart/form-data'>
-<input name='title' type='hidden' value='$iid `cat $ITEM_PATH/counter`'></input>
+<input name='title' type='hidden' value='$iid `cat counter`'></input>
 <input name='choir' type='hidden' value='$iid'></input>
 <button class="$RBS">+</button>
 </form>
@@ -21,12 +21,20 @@ AddForm() {
 
 AddForm >> $DOCUMENT_ROOT/tmp/fun
 
+show_members() {
+	groups | grep -q $iid || return 0
+	cat <<!
+<h4>`_ Members`</h4>
+<pre>`getent group $iid | tr ':' ' ' | awk '{ print $4 }' | tr ',' '\n'`</pre>
+!
+}
+
 cat <<!
 <h4>`_ Format`</h4>
 <pre>
-`cat $ITEM_PATH/format`
+`cat format`
 </pre>
+`show_members`
 <h4>`_ Songs`</h4>
 <pre>`list`</pre>
-</pre>
 !
