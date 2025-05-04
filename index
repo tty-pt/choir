@@ -3,7 +3,7 @@
 chords_path=$DOCUMENT_ROOT/items/chords/items
 
 list() {
-	qhash -l songs.db | cut -d' ' -f2- | while read link flags name; do
+	qhash -l songs.db | while read link flags name; do
 		echo "<a href='/chords/$link/'>$name</a>"
 	done
 }
