@@ -8,5 +8,5 @@ ls | while read line; do
 		test ! -z "$fmt" || continue
 		echo "-p\"$fmt\""
 		counter="`echo $counter + 1 | bc`"
-	done | xargs -I {} qhash {} $line/format.db
+	done | xargs -I {} qdb {} $line/format.db
 done
