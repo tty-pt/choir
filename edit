@@ -11,7 +11,7 @@ if test $REQUEST_METHOD = POST; then
 	}
 
 	test `list_ops | wc -l` -lt 1 || \
-		list_ops | xargs -I {} qdb {} songs.db
+		list_ops | xargs -I {} $qdb {} songs.db:s
 
 	cp $DOCUMENT_ROOT/tmp/mpfd/format format
 	rm format.db 2>/dev/null || true
@@ -19,7 +19,7 @@ if test $REQUEST_METHOD = POST; then
 	cat format | while read name; do
 		test ! -z "$name" || continue
 		echo -p\"$name\"
-	done | xargs -I {} qdb {} format.db
+	done | xargs -I {} $qdb {} format.db:s
 
 	SeeOther ./
 fi
@@ -39,8 +39,8 @@ checkboxes() {
 
 list_missing() {
 	test -f songs.db && \
-		qdb -q songs.db -L $chords_path/index.db
-		qdb -l $chords_path/index.db
+		$qdb -q songs.db:s -L $chords_path/index.db:s
+		$qdb -l $chords_path/index.db:s
 }
 
 cat <<!
@@ -59,7 +59,7 @@ cat <<!
 </div>
 <div class="h f">
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`qdb -l songs.db | checkboxes remove`
+`$qdb -l songs.db:s | checkboxes remove`
 	</div>
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
 `list_missing | checkboxes add`

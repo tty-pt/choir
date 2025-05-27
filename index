@@ -3,23 +3,20 @@
 chords_path=$DOCUMENT_ROOT/items/chords/items
 
 list() {
-	qhash -l songs.db | while read link flags name; do
+	$qdb -l songs.db:s | while read link flags name; do
 		echo "<a href='/chords/$link/'>$name</a>"
 	done
 }
 
 AddForm() {
 	im "$OWNER" "$iid" || return 0
-	cat <<!
-<form action='/sb/add/' method='POST' class='h f fic' enctype='multipart/form-data'>
-<input name='title' type='hidden' value='$iid `cat counter`'></input>
-<input name='choir' type='hidden' value='$iid'></input>
-<button class="$RBS">+</button>
-</form>
-!
+	title="$iid `cat counter`"
+	local _add="`_ add`"
+	buttons="$buttons`RB + "$_add" "/sb/add?choir=$iid&title=$title"`"
 }
 
-AddForm >> $DOCUMENT_ROOT/tmp/fun
+AddForm
+echo "$buttons" >> $DOCUMENT_ROOT/tmp/fun
 
 show_members() {
 	groups | grep -q $iid || return 0
