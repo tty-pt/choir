@@ -3,6 +3,7 @@
 chords_path=$DOCUMENT_ROOT/items/chords/items
 
 list() {
+	test -f songs.db || return 0
 	$qdb -l songs.db:s | while read link flags name; do
 		echo "<a href='/chords/$link/'>$name</a>"
 	done
@@ -16,7 +17,7 @@ AddForm() {
 }
 
 AddForm
-echo "$buttons" >> $DOCUMENT_ROOT/tmp/fun
+echo "$buttons" >> $fun
 
 show_members() {
 	groups | grep -q $iid || return 0

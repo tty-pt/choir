@@ -37,6 +37,11 @@ checkboxes() {
 	done
 }
 
+list_present() {
+	test ! -f songs.db || \
+		$qdb -l songs.db:s
+}
+
 list_missing() {
 	test -f songs.db && \
 		$qdb -q songs.db:s -L $chords_path/index.db:s
@@ -59,7 +64,7 @@ cat <<!
 </div>
 <div class="h f">
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
-`$qdb -l songs.db:s | checkboxes remove`
+`list_present | checkboxes remove`
 	</div>
 	<div class="v shf" style="max-height: 50vh; overflow: auto">
 `list_missing | checkboxes add`
